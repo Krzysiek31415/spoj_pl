@@ -1,50 +1,56 @@
-#include<algorithm>
-#include<numeric>
-#include<iostream>
-#include<iterator>
-#include<vector>
+#include <iostream>
 
-
-//https://pl.spoj.com/problems/GLUTTON/
-
+unsigned int * inputTimeEating(unsigned int size);
+unsigned int amountCookies(unsigned int * eatingOneCakeTime, unsigned int size);
 unsigned int cookiesToBoxes(unsigned int cookies, unsigned long long cakesInBox);
-
+ 
 int main()
 {
-    long long tests{};
-
+    unsigned long long tests{};
     std::cin >> tests;
 
     while(tests--)
     {
-        unsigned int people{};  //number of players
+        unsigned int people{};           //number of players
         unsigned long long cakesInBox{}; // number of cookies in one box
+
         std::cin >> people >> cakesInBox;
 
-        std::vector<unsigned int> eatingOneCakeTime;  // time to eat one cookie for 
-                                                      // all subsequent players [s]
-        std::generate_n(std::back_inserter(eatingOneCakeTime), 
-                        people, 
-                        [](){ 
-                            return *(std::istream_iterator<unsigned int>(std::cin));
-                        }
-        );
+        unsigned int * eatingOneCakeTime = inputTimeEating(people);
 
-        constexpr unsigned int secondsInOneDay = {24 * 3600};
+        unsigned int cookies = amountCookies(eatingOneCakeTime, people);
 
-        auto sumCookies = std::accumulate(eatingOneCakeTime.begin(),
-                                eatingOneCakeTime.end(), 
-                                0, 
-                                [](auto a, auto time)
-                                {
-                                    return std::move(a) + secondsInOneDay / time;
-                                }
-        );
+        std::cout << cookiesToBoxes(cookies, cakesInBox) << std::endl;
 
-        std::cout << cookiesToBoxes(sumCookies, cakesInBox) << '\n';
+        delete [] eatingOneCakeTime;
     }
 
     return 0;
+}
+
+unsigned int * inputTimeEating(unsigned int size)
+{
+    unsigned int * eatingOneCakeTime = new unsigned int[size];  // time to eat one cookie for 
+                                                                // all subsequent players [s
+    for(unsigned int i = 0; i < size; i++)
+    {
+        std::cin >> eatingOneCakeTime[i];
+    }
+
+    return eatingOneCakeTime;
+}
+
+unsigned int amountCookies(unsigned int * eatingOneCakeTime, unsigned int size)
+{
+    unsigned int cookies{};
+    constexpr unsigned int secondsInOneDay = 86400;
+
+    for(unsigned int i = 0; i < size; i++)
+    {
+        cookies += secondsInOneDay / eatingOneCakeTime[i];
+    }
+    
+    return cookies;
 }
 
 unsigned int cookiesToBoxes(unsigned int cookies, unsigned long long cakesInBox)
@@ -52,3 +58,6 @@ unsigned int cookiesToBoxes(unsigned int cookies, unsigned long long cakesInBox)
     auto temp = cookies / cakesInBox;
     return (cookies % cakesInBox) ? (temp + 1) : temp;
 }
+
+
+
